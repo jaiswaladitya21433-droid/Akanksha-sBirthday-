@@ -1216,7 +1216,7 @@ body {
 
     <div class="music-info-box" style="margin-top:18px;">
       <div class="m-title" id="m-title">Our Favourite Song</div>
-      <div class="m-artist" id="m-artist">♪ Upload to begin playing</div>
+      <div class="m-artist" id="m-artist">♪ Our song</div>
       <div class="progress-track" onclick="seekClick(event)">
         <div class="progress-fill" id="progress-fill"></div>
       </div>
@@ -1229,8 +1229,6 @@ body {
     </div>
 
     <audio id="audio" loop src="song.mp3"></audio>
-    <label class="upload-zone" for="music-input">🎵 Upload your song</label>
-    <input type="file" id="music-input" accept="audio/*" style="display:none;" onchange="loadAudio(this)">
 
     <button class="btn-ghost" onclick="goTo('page-menu')">← Back to gifts</button>
   </div>
@@ -1273,9 +1271,6 @@ body {
         <source src="birthday-video.mp4" type="video/mp4">
       </video>
     </div>
-
-    <label class="video-upload-btn-label" for="vp-input" style="display:inline-block;margin:12px 0 20px;">▶ Open Video Message</label>
-    <input type="file" id="vp-input" accept="video/*" style="display:none;" onchange="loadVideo(this)">
 
     <!-- Birthday countdown -->
     <p class="timer-title">Time celebrating your birthday ✨</p>
@@ -1383,8 +1378,7 @@ for(let i=0;i<12;i++) spawnParticle();
 })();
 
 /* ── TRY loading birthday video ─────────── */
-(function tryBdVideo(){
-  const vid = document.getElementById('vp-video');
+function checkBdVideo(){
   const canPlay = (src) => new Promise(res => {
     const v = document.createElement('video');
     v.oncanplay = ()=> res(true);
@@ -1397,7 +1391,8 @@ for(let i=0;i<12;i++) spawnParticle();
       document.getElementById('vp-loaded').style.display='block';
     }
   });
-})();
+}
+checkBdVideo();
 
 /* ── PAGE NAVIGATION ───────────────────── */
 let currentPage = 'page-loading';
@@ -1516,29 +1511,7 @@ function seekClick(e){
   const rect=e.currentTarget.getBoundingClientRect();
   audio.currentTime=((e.clientX-rect.left)/rect.width)*audio.duration;
 }
-function loadAudio(inp){
-  const f=inp.files[0]; if(!f) return;
-  audio.src=URL.createObjectURL(f);
-  document.getElementById('m-title').textContent=f.name.replace(/\.[^.]+$/,'');
-  document.getElementById('m-artist').textContent='♪ Your song';
-  audio.play().catch(()=>{});
-  playing=true; pBtn.textContent='⏸';
-  vinyl.classList.add('spinning');
-  eqBars.forEach(b=>b.classList.add('playing'));
-}
-
 /* ── VIDEO ──────────────────────────────── */
-function loadVideo(inp){
-  const f=inp.files[0]; if(!f) return;
-  const vid=document.getElementById('vp-video');
-  vid.src=URL.createObjectURL(f);
-  document.getElementById('vp-placeholder').style.display='none';
-  const loaded=document.getElementById('vp-loaded');
-  loaded.style.display='block';
-  vid.play().catch(()=>{});
-  for(let i=0;i<30;i++) setTimeout(spawnConfetti,i*35);
-}
-
 /* ── CONFETTI ───────────────────────────── */
 const CC=['#e91e63','#f48fb1','#fce4ec','#c2185b','#fff','#f8bbd0','#d4a574','#ff80ab','#880e4f'];
 let cTimer=null;
@@ -1601,9 +1574,10 @@ function replaySurprise(){
   pin=''; updateOrbs();
   // Reset video
   const vid=document.getElementById('vp-video');
-  vid.pause(); vid.src='';
+  vid.pause(); vid.currentTime=0;
   document.getElementById('vp-placeholder').style.display='block';
   document.getElementById('vp-loaded').style.display='none';
+  checkBdVideo();
   // Reset loading bar
   const bar=document.querySelector('.load-bar-fill');
   bar.style.animation='none'; void bar.offsetHeight; bar.style.animation='';
